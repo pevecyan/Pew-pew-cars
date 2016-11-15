@@ -1,49 +1,30 @@
 var listener;
 var cylinder;
-function initialize(){
-    //input
-    listener = new window.keypress.Listener();
 
-    // the canvas/window resize event handler
+function initialize(){
+    listener = new window.keypress.Listener();
+    
+    initializeEngine();
+
     window.addEventListener('resize', function(){
         engine.resize();
     });
-
-
-    initializeEngine();
 }
 
 
 function initializeEngine(){
-    // get the canvas DOM element
     var canvas = document.getElementById('renderCanvas');
-
-    // load the 3D engine
     var engine = new BABYLON.Engine(canvas, true);
     
-    // createScene function that creates and return the scene
     var createScene = function(){
-
         var scene = new BABYLON.Scene(engine);
-
         scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
-
         //scene.getPhysicsEngine().setTimeStep(1/10000)
         
         var light = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0.2), scene);
         light.groundColor = new BABYLON.Color3(.2, .2, .2);
 
-        // Camera
         var camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
-        camera.radius *= 1;
-
-        
-
-        var y = 0;
-        //var ground = BABYLON.Mesh.CreateGround("ground1", 600, 600, 2, scene);
-        //ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, scene);
-        
-
 
         //CAR!
         var width = 2;
@@ -204,7 +185,10 @@ function initializeEngine(){
 
             }
         }
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "worldHeightMap.jpg", 400, 400, 250, 0, 15, scene, false, function() {
+
+        //skyBoxInit(scene);
+
+        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/worldHeightMap.jpg", 400, 400, 250, 0, 15, scene, false, function() {
             ground.position.y -= 10;
             ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
                 friction: 1,
@@ -212,16 +196,121 @@ function initializeEngine(){
             });
         });
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-        groundMaterial.diffuseTexture = new BABYLON.Texture("world.png", scene);
+        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/world.png", scene);
         ground.material = groundMaterial;
+
+         //BOX
+
+        var box = BABYLON.Mesh.CreateBox("box1", 5.0, scene);
+        box.position = new BABYLON.Vector3(-10, -7.5, 0);  
+        box.material = new BABYLON.StandardMaterial('texture1', scene);
+        box.material.diffuseColor = new BABYLON.Color3(1, 0, 0);
+
+        //PHYSICS   
+
+        scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+        var gravity = new BABYLON.Vector3(0, -9.81, 0);
+        scene.enablePhysics(gravity, new BABYLON.CannonJSPlugin());
+        scene.collisionsEnabled = true;
+
+        box.applyGravity = true;
+        box.ellipsoid = new BABYLON.Vector3(1.0, 1.0, 1.0);
+
+        ground.applyGravity = true;
+        ground.ellipsoid = new BABYLON.Vector3(400.0, 2.0, 400.0);  
+
+        box.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 100 });
+
+        ground.checkCollisions = true;
+        box.checkCollisions = true;   
+
+        shootBullet(scene, camera, box, ground);   
+
         return scene;
     }
-
-    // call the createScene function
     var scene = createScene();
 
-    // run the render loop
     engine.runRenderLoop(function(){
         scene.render();
     });
+}
+
+
+function bulletParticles(scene, bullet){
+    var particleSystem = new BABYLON.ParticleSystem("particles", 200, scene);
+    particleSystem.particleTexture = new BABYLON.Texture("assets/flare.png", scene);
+    particleSystem.emitter = bullet;
+    particleSystem.minEmitBox = new BABYLON.Vector3.Zero();
+    particleSystem.maxEmitBox = new BABYLON.Vector3.Zero();
+    particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+    particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+    particleSystem.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
+    particleSystem.minSize = 0.1;
+    particleSystem.maxSize = 0.5;
+    particleSystem.minLifeTime = 0.7;
+    particleSystem.maxLifeTime = 0.9;
+    particleSystem.emitRate = 1500;
+    particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+    particleSystem.gravity =    new BABYLON.Vector3(0, -9.81, 0);
+    particleSystem.direction1 = new BABYLON.Vector3(-1, 1, -1);
+    particleSystem.direction2 = new BABYLON.Vector3( 1, 1,  1);
+    particleSystem.minAngularSpeed = 0;
+    particleSystem.maxAngularSpeed = Math.PI;
+    particleSystem.minEmitPower = 3;
+    particleSystem.maxEmitPower = 4;
+    particleSystem.updateSpeed = 0.005;
+    particleSystem.start(); 
+}
+
+function shootBullet(scene, camera, box, ground){
+    window.addEventListener("keydown", function (e) {
+    if (e.keyCode == 88) { //x
+        var bullet = BABYLON.Mesh.CreateSphere('bullet', 100.0, 0.5, scene);
+        var startPos = camera.position; //car position
+
+        bullet.position = new BABYLON.Vector3(startPos.x, startPos.y, startPos.z);
+        bullet.material =  new BABYLON.StandardMaterial('texture1', scene);
+        bullet.material.diffuseColor = new BABYLON.Color3(3, 2, 0);
+
+        bullet.applyGravity = true;
+        bullet.ellipsoid = new BABYLON.Vector3(0.25, 0.25, 0.25);
+        bullet.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 1.0 });
+
+        bullet.checkCollisions = true;     
+            
+        var invView = new BABYLON.Matrix();
+        camera.getViewMatrix().invertToRef(invView); //car
+        var direction = BABYLON.Vector3.TransformNormal(new BABYLON.Vector3(0, 0, 1), invView);
+        direction.normalize();  
+
+        //bulletParticles(scene, bullet);
+        
+        scene.registerBeforeRender(function () {            
+            bullet.applyImpulse(direction, camera.position);    
+            //bullet.position.addInPlace(direction);            
+        });  
+
+        box.physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
+            main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+            //collided.object.setEnabled(0);
+        });
+
+        ground.physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
+            //setTimeout(function(){ collided.object.setEnabled(0); }, 500);
+            collided.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+        }); 
+    }
+    });
+}
+
+function skyBoxInit(scene){
+    var skybox = BABYLON.Mesh.CreateBox("skyBox", 60.0, scene);
+    skybox.position = new BABYLON.Vector3(0, 30.1, 0);
+    var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("skybox/skybox", scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skybox.material = skyboxMaterial;
 }
