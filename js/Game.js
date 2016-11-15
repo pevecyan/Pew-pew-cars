@@ -13,11 +13,11 @@ var Game = {
         ground.material = groundMaterial;
 
         //Skybox
-        var skybox = BABYLON.Mesh.CreateBox("skyBox", 60.0, scene); 
+        var skybox = BABYLON.Mesh.CreateBox("skyBox", 800.0, scene); 
         skybox.position = new BABYLON.Vector3(0, 30.1, 0); 
         var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene); 
         skyboxMaterial.backFaceCulling = false; 
-        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("skybox/skybox", scene); 
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/skybox/skybox", scene); 
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE; 
         skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0); 
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0); 
