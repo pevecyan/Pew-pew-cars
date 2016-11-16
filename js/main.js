@@ -284,11 +284,31 @@ function shootBullet(scene, camera, box, ground){
         direction.normalize();  
 
         //bulletParticles(scene, bullet);
+
+         //---------------------TODO
+
+        var ray = BABYLON.Ray.CreateNewFromTo(camera.position, camera.getTarget()).direction;
+        var r = camera.getTarget().subtract(camera.position);
+        r = r.normalize();     
+
+        var forwards = new BABYLON.Vector3(parseFloat(Math.sin(bullet.rotation.y)) / 8, 0.15, parseFloat(Math.cos(bullet.rotation.y)) / 8);
+        forwards.negate();
+
+        //bullet.moveWithCollisions(forwards);
+
+        var bulletDirection = new BABYLON.Vector3(0, 0, -20);
+        bullet.physicsImpostor.setLinearVelocity(bulletDirection);
+
+        //bullet.applyImpulse(direction, camera.position);
+        //bullet.position.addInPlace(direction); 
         
-        scene.registerBeforeRender(function () {            
-            bullet.applyImpulse(direction, camera.position);    
-            //bullet.position.addInPlace(direction);            
-        });  
+        scene.registerBeforeRender(function () {
+            //bullet.position.z -= 0.1;  
+            //bullet.position.addInPlace(direction);     
+            //bullet.applyImpulse(direction, bullet.getAbsolutePosition());             
+        });
+
+        //--------------------
 
         box.physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
             main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
