@@ -1,8 +1,8 @@
 var Game = {
     createWorld:function(scene){
         //ground
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 30, scene, false, function() {
-        ground.position.y -= 100;
+        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 20, scene, false, function() {
+        ground.position = new BABYLON.Vector3(100,0,0);
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
                 friction: 1,
                 mass: 0,
@@ -22,6 +22,23 @@ var Game = {
         skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0); 
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0); 
         skybox.material = skyboxMaterial; 
+
+        var finish = BABYLON.Mesh.CreateBox("finish", 20.0, scene);
+        finish.scaling.x = 10;
+        finish.scaling.y = 0.8;
+        finish.position = new BABYLON.Vector3(-90, 9, -190);  
+        finish.material = new BABYLON.StandardMaterial('texturef', scene);
+        finish.material.diffuseColor = new BABYLON.Color3(1, 1, 0);
+        finish.visibility = 0.4;
+
+        var half = BABYLON.Mesh.CreateBox("half", 20.0, scene);
+        half.scaling.x = 10;
+        half.scaling.y = 0.8;
+        half.position = new BABYLON.Vector3(460, 9, 0);  
+        half.material = new BABYLON.StandardMaterial('textureh', scene);
+        half.material.diffuseColor = new BABYLON.Color3(1, 1, 0);
+        half.visibility = 0.4;
+        
     },
     createCar:function(scene){
         var width = 10;

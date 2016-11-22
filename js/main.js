@@ -1,6 +1,10 @@
 var listener;
 var cylinder;
 var chassis;
+var finishPosition;
+var halfPosition;
+var laps = 1;
+
 function initialize(){
     //input
     listener = new window.keypress.Listener();
@@ -72,9 +76,14 @@ function createScene(engine){
     var camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
     camera.radius *= 2 ;
     Game.Car.camera = camera;
+
+    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(-10, 700, -20), scene);
+    camera2.setTarget(BABYLON.Vector3.Zero());
+    //scene.activeCamera = camera2;
+
     Game.createWorld(scene);
     //CAR
-    Game.createCar(scene);
+    var car = Game.createCar(scene);
     
     camera.target = (Game.Car.chassis);
 
@@ -83,6 +92,45 @@ function createScene(engine){
 
     scene.registerAfterRender(Game.Car.update);
     Game.Scene = scene;
+
+    finishPosition = false;
+    halfPosition = true;
+    car = Game.Car.chassis;
+    
+    scene.registerBeforeRender(function () {
+        if(halfPosition){
+            checkFinishLine(car);
+        }
+        if(finishPosition){
+            checkHalfLine(car);
+        }           
+    });
+
     return scene;
 }
 
+//LAPS
+function checkFinishLine(car){
+    currPositionX = car.position.x;
+    currPositionZ = car.position.z;
+    if(currPositionX<10 && currPositionX>-190 && currPositionZ<-180 && currPositionZ>-200){
+        finishPosition = true;
+        halfPosition = false;
+        laps--;
+        console.log("Remaining laps: "+laps);
+        if(laps == 0){
+            console.log("Finished!");
+            engine.stopRenderLoop();
+        }
+    } 
+    
+}
+
+function checkHalfLine(car){
+    currPositionX = car.position.x;
+    currPositionZ = car.position.z;
+    if(currPositionX<560 && currPositionX>360 && currPositionZ<10 && currPositionZ>-10){
+        finishPosition = false;
+        halfPosition = true;
+    } 
+}
