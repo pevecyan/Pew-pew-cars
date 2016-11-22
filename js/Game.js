@@ -1,3 +1,5 @@
+var test;
+
 var Game = {
     createWorld:function(scene){
         //ground
@@ -11,6 +13,10 @@ var Game = {
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
         groundMaterial.diffuseTexture = new BABYLON.Texture("assets/asphalt.jpg", scene);
         ground.material = groundMaterial;
+
+        ground.applyGravity = true;
+        //ground.ellipsoid = new BABYLON.Vector3(1000.0, 1.0, 1000.0);  
+        ground.checkCollisions = true; 
 
         //Skybox
         var skybox = BABYLON.Mesh.CreateBox("skyBox", 1500.0, scene); 
@@ -38,6 +44,16 @@ var Game = {
         half.material = new BABYLON.StandardMaterial('textureh', scene);
         half.material.diffuseColor = new BABYLON.Color3(1, 1, 0);
         half.visibility = 0.4;
+
+        //test box
+        test = BABYLON.Mesh.CreateBox("test", 10.0, scene);
+        test.position = new BABYLON.Vector3(0, 100, -50);  
+        test.material = new BABYLON.StandardMaterial('textureh', scene);
+        test.material.diffuseColor = new BABYLON.Color3(1, 0, 0);
+        test.applyGravity = true;
+        test.ellipsoid = new BABYLON.Vector3(10.0, 10.0, 10.0);
+        test.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 100 });
+        test.checkCollisions = true;
         
     },
     createCar:function(scene){
@@ -57,7 +73,7 @@ var Game = {
             height: height,
             depth: depth
         }, scene);
-        Game.Car.chassis.position.y =  100 + wheelDiameter + height / 2;
+        Game.Car.chassis.position.y =  30 + wheelDiameter + height / 2;
         Game.Car.chassis.physicsImpostor = new BABYLON.PhysicsImpostor(Game.Car.chassis, BABYLON.PhysicsEngine.BoxImpostor, {
             mass:100,
             nativeParams: {
@@ -219,7 +235,7 @@ var Game = {
         wheels:null,
         bullets: [],
         shoot:function(){
-            var bullet = BABYLON.MeshBuilder.CreateSphere("", {
+            var bullet = BABYLON.MeshBuilder.CreateSphere("bullet", {
                 width: 1,
                 height: 1,
                 depth: 1
@@ -228,6 +244,17 @@ var Game = {
             bullet.position = new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z);
             
             var direction = Game.Car.chassis.position.subtract(Game.Car.aim.getAbsolutePosition());
+
+            bullet.applyGravity = true;
+            bullet.ellipsoid = new BABYLON.Vector3(1.0, 1.0, 1.0);
+            bullet.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 0.001 });  
+            bullet.checkCollisions = true;  
+
+            bulletParticles(Game.Scene, bullet);
+
+            test.physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
+                main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+            }); 
             
             var k = {startPostion:new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z), bullet:bullet, direction: new BABYLON.Vector3(direction.x,direction.y,direction.z)};
             Game.Car.bullets.push(k);
@@ -308,16 +335,15 @@ var Game = {
 
             //Game.Car.chassis.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0,0,0));
             
-
             //update bullets
             for(var i = 0; i < Game.Car.bullets.length; i++){
                 var startPostion = Game.Car.bullets[i].startPostion;
                 var bullet = Game.Car.bullets[i].bullet;
                 var direction = Game.Car.bullets[i].direction;
                 direction = direction.normalize();
-                direction.x *= 5;
-                direction.y *= 5;
-                direction.z *= 5;
+                direction.x *= 15;
+                direction.y *= 15;
+                direction.z *= 15;
                 bullet.position = bullet.position.add(direction);
             }
         }
@@ -331,4 +357,30 @@ var Game = {
         shooted:false,
     }
 
+}
+
+function bulletParticles(scene, bullet){
+    var particleSystem = new BABYLON.ParticleSystem("particles", 200, scene);
+    particleSystem.particleTexture = new BABYLON.Texture("assets/flare.png", scene);
+    particleSystem.emitter = bullet;
+    particleSystem.minEmitBox = new BABYLON.Vector3.Zero();
+    particleSystem.maxEmitBox = new BABYLON.Vector3.Zero();
+    particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+    particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+    particleSystem.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
+    particleSystem.minSize = 0.1;
+    particleSystem.maxSize = 0.5;
+    particleSystem.minLifeTime = 0.7;
+    particleSystem.maxLifeTime = 0.9;
+    particleSystem.emitRate = 1500;
+    particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+    particleSystem.gravity =    new BABYLON.Vector3(0, -9.81, 0);
+    particleSystem.direction1 = new BABYLON.Vector3(-1, 1, -1);
+    particleSystem.direction2 = new BABYLON.Vector3( 1, 1,  1);
+    particleSystem.minAngularSpeed = 0;
+    particleSystem.maxAngularSpeed = Math.PI;
+    particleSystem.minEmitPower = 3;
+    particleSystem.maxEmitPower = 4;
+    particleSystem.updateSpeed = 0.005;
+    particleSystem.start(); 
 }

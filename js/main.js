@@ -3,7 +3,7 @@ var cylinder;
 var chassis;
 var finishPosition;
 var halfPosition;
-var laps = 1;
+var laps = 17;
 
 function initialize(){
     //input
@@ -65,7 +65,10 @@ function initializeEngine(){
 function createScene(engine){
     var scene = new BABYLON.Scene(engine);
 
-    scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
+    var gravity = new BABYLON.Vector3(0, -9.81, 0);
+    scene.gravity = gravity
+    scene.enablePhysics(gravity, new BABYLON.CannonJSPlugin());
+    scene.collisionsEnabled = true;
 
     //scene.getPhysicsEngine().setTimeStep(1/10000)
     
@@ -77,7 +80,7 @@ function createScene(engine){
     camera.radius *= 2 ;
     Game.Car.camera = camera;
 
-    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(-10, 700, -20), scene);
+    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 700, 0), scene);
     camera2.setTarget(BABYLON.Vector3.Zero());
     //scene.activeCamera = camera2;
 
