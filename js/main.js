@@ -71,7 +71,7 @@ function createScene(engine){
     // Camera
     var camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
     camera.radius *= 2 ;
-
+    Game.Car.camera = camera;
     Game.createWorld(scene);
     //CAR
     Game.createCar(scene);
@@ -82,7 +82,7 @@ function createScene(engine){
     document.onkeyup = Game.keyboardHandler;
 
     scene.registerAfterRender(Game.Car.update);
-
+    Game.Scene = scene;
     return scene;
 }
 

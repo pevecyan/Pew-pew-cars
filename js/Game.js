@@ -1,11 +1,11 @@
 var Game = {
     createWorld:function(scene){
         //ground
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/h.png", 1000, 1000, 250, 0, 250, scene, false, function() {
+        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/track.png", 1500, 1500, 250, 0, 50, scene, false, function() {
         ground.position.y -= 100;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
                 friction: 1,
-                mass: 0
+                mass: 0,
             });
         });
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
@@ -13,7 +13,7 @@ var Game = {
         ground.material = groundMaterial;
 
         //Skybox
-        var skybox = BABYLON.Mesh.CreateBox("skyBox", 800.0, scene); 
+        var skybox = BABYLON.Mesh.CreateBox("skyBox", 1500.0, scene); 
         skybox.position = new BABYLON.Vector3(0, 30.1, 0); 
         var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene); 
         skyboxMaterial.backFaceCulling = false; 
@@ -42,11 +42,20 @@ var Game = {
         }, scene);
         Game.Car.chassis.position.y =  100 + wheelDiameter + height / 2;
         Game.Car.chassis.physicsImpostor = new BABYLON.PhysicsImpostor(Game.Car.chassis, BABYLON.PhysicsEngine.BoxImpostor, {
-            mass:20,
+            mass:100,
             nativeParams: {
     		     //angularDamping: 10000,
 		    }
         })
+
+        Game.Car.aim = BABYLON.MeshBuilder.CreateBox("Aim", {
+            width: 1,
+            height: 1,
+            depth: 1
+        }, scene);
+        Game.Car.aim.position.z = 8;
+
+        Game.Car.aim.parent = Game.Car.chassis;
 
         Game.Car.wheels = [0, 1, 2, 3].map(function(num) {
             var wheel = BABYLON.MeshBuilder.CreateCylinder("wheel" + num, {
@@ -65,8 +74,8 @@ var Game = {
             
 
             wheel.physicsImpostor = new BABYLON.PhysicsImpostor(wheel, BABYLON.PhysicsEngine.SphereImpostor, {
-                friction:0.3,
-                mass: 3
+                friction:0.8,
+                mass: 40,
             });
             return wheel;
         });
@@ -177,28 +186,49 @@ var Game = {
                 //Game.Car.vehicle.setSteeringValue(up ? 0 : maxSteerVal, 3);
                 break;
             case 32:
-                Game.Car.vehicle.setWheelForce  (-100,0);
-                Game.Car.vehicle.setWheelForce  (-100,1);
+                Game.Keyboard.space = !up;
                 break;
 
         }
         
     },
+    Scene:null,
     Car:{
         currentSteer:0,
+        camera:null,
         vehicle:null,
         chassis:null,
+        aim:null,
         wheels:null,
+        bullets: [],
+        shoot:function(){
+            var bullet = BABYLON.MeshBuilder.CreateSphere("", {
+                width: 1,
+                height: 1,
+                depth: 1
+            }, Game.Scene);
+            
+            bullet.position = new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z);
+            
+            var direction = Game.Car.chassis.position.subtract(Game.Car.aim.getAbsolutePosition());
+            
+            Game.Car.bullets.push({startPostion:new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z), bullet:bullet, direction: new BABYLON.Vector3(direction.x,direction.y,direction.z)});
+            if(Game.Car.bullets.length>10){
+                //Game.Car.bullets[0].bullet.dispose();
+                Game.Car.bullets.shift().bullet.dispose();
+            }
+
+        },
         update: function(){
-            var maxSteerVal = Math.PI / 10;
-            var maxForce = 300;
+            var maxSteerVal = Math.PI / 15;
+            var maxForce = 2500;
 
             //UP DOWN
             if(Game.Keyboard.up){
                 Game.Car.vehicle.setWheelForce(-maxForce, 0);
                 Game.Car.vehicle.setWheelForce(maxForce, 1);
-                Game.Car.vehicle.setWheelForce(-maxForce, 2);
-                Game.Car.vehicle.setWheelForce(maxForce, 3);
+                //Game.Car.vehicle.setWheelForce(-maxForce, 2);
+                //Game.Car.vehicle.setWheelForce(maxForce, 3);
             }
             else if(Game.Keyboard.down){
                 Game.Car.vehicle.setWheelForce(maxForce/2, 0);
@@ -211,7 +241,7 @@ var Game = {
             }
 
             if(Game.Keyboard.left){
-                Game.Car.currentSteer += 0.02;
+                Game.Car.currentSteer += 0.01;
                 if(Game.Car.currentSteer > maxSteerVal) Game.Car.currentSteer = maxSteerVal;
                 //Game.Car.wheels[1].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[1].getAbsolutePosition());
                 //Game.Car.wheels[0].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[0].getAbsolutePosition());
@@ -219,7 +249,7 @@ var Game = {
                 //Game.Car.wheels[3].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[3].getAbsolutePosition());
             }
             else if(Game.Keyboard.right){
-                Game.Car.currentSteer -= 0.02;
+                Game.Car.currentSteer -= 0.01;
                 if(Game.Car.currentSteer < -maxSteerVal) Game.Car.currentSteer = -maxSteerVal;
                 //Game.Car.wheels[1].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[1].getAbsolutePosition());
                 //Game.Car.wheels[0].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[0].getAbsolutePosition());
@@ -242,17 +272,30 @@ var Game = {
                 }
             }
 
+            if(!Game.Keyboard.shooted && Game.Keyboard.space){
+                Game.Car.shoot();
+                Game.Keyboard.shooted = true;
+            }
+            if(!Game.Keyboard.space)
+                Game.Keyboard.shooted = false;
+
             Game.Car.vehicle.setSteeringValue(Game.Car.currentSteer,2);
             Game.Car.vehicle.setSteeringValue(Game.Car.currentSteer,3);
 
-            //var maxAngularVelocity = 0.05;
-            //var currentAngularVelocity = Game.Car.chassis.physicsImpostor.getAngularVelocity();
-            Game.Car.chassis.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0,0,0));
-            //Game.Car.chassis.physicsImpostor.setAngularVelocity( new CANNON.Vec3(
-            //    BABYLON.MathTools.Clamp(currentAngularVelocity.x, -maxAngularVelocity,maxAngularVelocity),
-            //    BABYLON.MathTools.Clamp(currentAngularVelocity.y, -maxAngularVelocity,maxAngularVelocity),
-            //    BABYLON.MathTools.Clamp(currentAngularVelocity.z, -maxAngularVelocity,maxAngularVelocity)
-            //));
+            //Game.Car.chassis.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0,0,0));
+            
+
+            //update bullets
+            for(var i = 0; i < Game.Car.bullets.length; i++){
+                var startPostion = Game.Car.bullets[i].startPostion;
+                var bullet = Game.Car.bullets[i].bullet;
+                var direction = Game.Car.bullets[i].direction;
+                direction = direction.normalize();
+                direction.x *= 5;
+                direction.y *= 5;
+                direction.z *= 5;
+                bullet.position = bullet.position.add(direction);
+            }
         }
     },
     Keyboard:{
@@ -260,6 +303,8 @@ var Game = {
         down:false,
         left:false,
         right:false,
+        space:false,
+        shooted:false,
     }
 
 }
