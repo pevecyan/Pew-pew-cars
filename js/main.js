@@ -80,7 +80,7 @@ function createScene(engine){
     camera.radius *= 2 ;
     Game.Car.camera = camera;
 
-    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 700, 0), scene);
+    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 200, 0), scene);
     camera2.setTarget(BABYLON.Vector3.Zero());
     //scene.activeCamera = camera2;
 

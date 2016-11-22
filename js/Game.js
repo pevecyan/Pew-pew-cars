@@ -1,9 +1,10 @@
 var test;
+var ground;
 
 var Game = {
     createWorld:function(scene){
         //ground
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 20, scene, false, function() {
+        ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 20, scene, false, function() {
         ground.position = new BABYLON.Vector3(100,0,0);
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
                 friction: 1,
@@ -253,6 +254,7 @@ var Game = {
             bulletParticles(Game.Scene, bullet);
 
             test.physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
+                collided.object.setEnabled(0);
                 main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
             }); 
             
@@ -341,9 +343,9 @@ var Game = {
                 var bullet = Game.Car.bullets[i].bullet;
                 var direction = Game.Car.bullets[i].direction;
                 direction = direction.normalize();
-                direction.x *= 15;
-                direction.y *= 15;
-                direction.z *= 15;
+                direction.x *= 10;
+                direction.y *= 10;
+                direction.z *= 10;
                 bullet.position = bullet.position.add(direction);
             }
         }
@@ -360,7 +362,7 @@ var Game = {
 }
 
 function bulletParticles(scene, bullet){
-    var particleSystem = new BABYLON.ParticleSystem("particles", 200, scene);
+    var particleSystem = new BABYLON.ParticleSystem("particles", 500, scene);
     particleSystem.particleTexture = new BABYLON.Texture("assets/flare.png", scene);
     particleSystem.emitter = bullet;
     particleSystem.minEmitBox = new BABYLON.Vector3.Zero();
@@ -368,19 +370,19 @@ function bulletParticles(scene, bullet){
     particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
     particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
     particleSystem.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
-    particleSystem.minSize = 0.1;
-    particleSystem.maxSize = 0.5;
-    particleSystem.minLifeTime = 0.7;
-    particleSystem.maxLifeTime = 0.9;
-    particleSystem.emitRate = 1500;
+    particleSystem.minSize = 0.3;
+    particleSystem.maxSize = 1.2;
+    particleSystem.minLifeTime = 1;
+    particleSystem.maxLifeTime = 2;
+    particleSystem.emitRate = 2000;
     particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
     particleSystem.gravity =    new BABYLON.Vector3(0, -9.81, 0);
     particleSystem.direction1 = new BABYLON.Vector3(-1, 1, -1);
     particleSystem.direction2 = new BABYLON.Vector3( 1, 1,  1);
     particleSystem.minAngularSpeed = 0;
     particleSystem.maxAngularSpeed = Math.PI;
-    particleSystem.minEmitPower = 3;
-    particleSystem.maxEmitPower = 4;
-    particleSystem.updateSpeed = 0.005;
+    particleSystem.minEmitPower = 7;
+    particleSystem.maxEmitPower = 10;
+    particleSystem.updateSpeed = 0.01;
     particleSystem.start(); 
 }
