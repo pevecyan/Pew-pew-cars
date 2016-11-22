@@ -212,10 +212,17 @@ var Game = {
             
             var direction = Game.Car.chassis.position.subtract(Game.Car.aim.getAbsolutePosition());
             
-            Game.Car.bullets.push({startPostion:new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z), bullet:bullet, direction: new BABYLON.Vector3(direction.x,direction.y,direction.z)});
+            var k = {startPostion:new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z), bullet:bullet, direction: new BABYLON.Vector3(direction.x,direction.y,direction.z)};
+            Game.Car.bullets.push(k);
+           
+            setTimeout(function(){
+                //Destroy after some time
+                k.bullet.dispose();
+
+            }, 1000)
             if(Game.Car.bullets.length>10){
                 //Game.Car.bullets[0].bullet.dispose();
-                Game.Car.bullets.shift().bullet.dispose();
+                Game.Car.bullets.shift();
             }
 
         },
