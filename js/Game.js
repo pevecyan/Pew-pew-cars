@@ -1,7 +1,7 @@
 var Game = {
     createWorld:function(scene){
         //ground
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/track.png", 1500, 1500, 250, 0, 50, scene, false, function() {
+        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 30, scene, false, function() {
         ground.position.y -= 100;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
                 friction: 1,
@@ -9,7 +9,7 @@ var Game = {
             });
         });
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-        groundMaterial.diffuseTexture = new BABYLON.Texture("test.jpg", scene);
+        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/asphalt.jpg", scene);
         ground.material = groundMaterial;
 
         //Skybox
