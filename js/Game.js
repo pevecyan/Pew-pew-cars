@@ -1,8 +1,8 @@
 var Game = {
     createWorld:function(scene){
         //ground
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "3D2.jpg", 800, 800, 250, 0, 25, scene, false, function() {
-        ground.position.y -= 0;
+        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/h.png", 1000, 1000, 250, 0, 250, scene, false, function() {
+        ground.position.y -= 100;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
                 friction: 1,
                 mass: 0
@@ -24,7 +24,7 @@ var Game = {
         skybox.material = skyboxMaterial; 
     },
     createCar:function(scene){
-        var width = 8;
+        var width = 10;
         var depth = 16;
         var height = 0.1;
 
@@ -40,9 +40,12 @@ var Game = {
             height: height,
             depth: depth
         }, scene);
-        Game.Car.chassis.position.y =  100+ wheelDiameter + height / 2;
+        Game.Car.chassis.position.y =  100 + wheelDiameter + height / 2;
         Game.Car.chassis.physicsImpostor = new BABYLON.PhysicsImpostor(Game.Car.chassis, BABYLON.PhysicsEngine.BoxImpostor, {
-            mass: 20
+            mass:20,
+            nativeParams: {
+    		     //angularDamping: 10000,
+		    }
         })
 
         Game.Car.wheels = [0, 1, 2, 3].map(function(num) {
@@ -62,8 +65,8 @@ var Game = {
             
 
             wheel.physicsImpostor = new BABYLON.PhysicsImpostor(wheel, BABYLON.PhysicsEngine.SphereImpostor, {
-                friction:0.5,
-                mass: 6
+                friction:0.3,
+                mass: 3
             });
             return wheel;
         });
@@ -188,12 +191,14 @@ var Game = {
         wheels:null,
         update: function(){
             var maxSteerVal = Math.PI / 10;
-            var maxForce = 400;
+            var maxForce = 300;
 
             //UP DOWN
             if(Game.Keyboard.up){
                 Game.Car.vehicle.setWheelForce(-maxForce, 0);
                 Game.Car.vehicle.setWheelForce(maxForce, 1);
+                Game.Car.vehicle.setWheelForce(-maxForce, 2);
+                Game.Car.vehicle.setWheelForce(maxForce, 3);
             }
             else if(Game.Keyboard.down){
                 Game.Car.vehicle.setWheelForce(maxForce/2, 0);
@@ -201,15 +206,25 @@ var Game = {
             }else{
                 Game.Car.vehicle.setWheelForce(0, 0);
                 Game.Car.vehicle.setWheelForce(0, 1);
+                Game.Car.vehicle.setWheelForce(0, 2);
+                Game.Car.vehicle.setWheelForce(0, 3);
             }
 
             if(Game.Keyboard.left){
-                Game.Car.currentSteer += 0.05;
+                Game.Car.currentSteer += 0.02;
                 if(Game.Car.currentSteer > maxSteerVal) Game.Car.currentSteer = maxSteerVal;
+                //Game.Car.wheels[1].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[1].getAbsolutePosition());
+                //Game.Car.wheels[0].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[0].getAbsolutePosition());
+                //Game.Car.wheels[2].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[2].getAbsolutePosition());
+                //Game.Car.wheels[3].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[3].getAbsolutePosition());
             }
             else if(Game.Keyboard.right){
-                Game.Car.currentSteer -= 0.05;
+                Game.Car.currentSteer -= 0.02;
                 if(Game.Car.currentSteer < -maxSteerVal) Game.Car.currentSteer = -maxSteerVal;
+                //Game.Car.wheels[1].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[1].getAbsolutePosition());
+                //Game.Car.wheels[0].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[0].getAbsolutePosition());
+                //Game.Car.wheels[2].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[2].getAbsolutePosition());
+                //Game.Car.wheels[3].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[3].getAbsolutePosition());
             }
             else{
                 if(Game.Car.currentSteer > 0){
@@ -219,10 +234,25 @@ var Game = {
                     Game.Car.currentSteer += 0.05;
                     if(Game.Car.currentSteer >= 0) Game.Car.currentSteer = 0;
                 }
+                if(Math.abs(Game.Car.currentSteer) > 0){
+                    //Game.Car.wheels[1].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[1].getAbsolutePosition());
+                    //Game.Car.wheels[0].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[0].getAbsolutePosition());
+                    //Game.Car.wheels[2].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[2].getAbsolutePosition());
+                    //Game.Car.wheels[3].physicsImpostor.applyImpulse(new BABYLON.Vector3(0, -10, 0), Game.Car.wheels[3].getAbsolutePosition());
+                }
             }
 
             Game.Car.vehicle.setSteeringValue(Game.Car.currentSteer,2);
             Game.Car.vehicle.setSteeringValue(Game.Car.currentSteer,3);
+
+            //var maxAngularVelocity = 0.05;
+            //var currentAngularVelocity = Game.Car.chassis.physicsImpostor.getAngularVelocity();
+            Game.Car.chassis.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0,0,0));
+            //Game.Car.chassis.physicsImpostor.setAngularVelocity( new CANNON.Vec3(
+            //    BABYLON.MathTools.Clamp(currentAngularVelocity.x, -maxAngularVelocity,maxAngularVelocity),
+            //    BABYLON.MathTools.Clamp(currentAngularVelocity.y, -maxAngularVelocity,maxAngularVelocity),
+            //    BABYLON.MathTools.Clamp(currentAngularVelocity.z, -maxAngularVelocity,maxAngularVelocity)
+            //));
         }
     },
     Keyboard:{

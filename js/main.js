@@ -5,13 +5,13 @@ function initialize(){
     //input
     listener = new window.keypress.Listener();
 
+    var engine = initializeEngine();
     // the canvas/window resize event handler
     window.addEventListener('resize', function(){
         engine.resize();
     });
 
 
-    initializeEngine();
 }
 
 
@@ -25,6 +25,14 @@ function initializeEngine(){
     // call the createScene function
     var scene = createScene(engine);
 
+    //BABYLON.SceneLoader.ImportMesh("", "assets/", "tree.babylon", scene, function (models) { 
+    //    models[0].scaling = new BABYLON.Vector3(10.0, 10.0, 10.0); 
+    //    models[0].position.y = 0;
+            //models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, {
+            //    friction: 1,
+            //    mass: 0
+           // });
+    //});
     //scene.registerBeforeRender(function(){
         //console.log(chassis.rotationQuaternion.toEulerAngles());
         //if(chassis.rotationQuaternion.toEulerAngles().x > Math.PI/4){
@@ -40,12 +48,14 @@ function initializeEngine(){
         //chassis.rotationQuaternion = chassis.rotationQuaternion.add(BABYLON.Quaternion.RotationAlphaBetaGamma(0, 0, 0));
     //});
 
-    scene.registerBeforeRender(Game.Car.update);
+    
 
     // run the render loop
     engine.runRenderLoop(function(){
         scene.render();
     });
+
+    return engine;
 }
 
 function createScene(engine){
@@ -70,6 +80,8 @@ function createScene(engine){
 
     document.onkeydown = Game.keyboardHandler;
     document.onkeyup = Game.keyboardHandler;
+
+    scene.registerAfterRender(Game.Car.update);
 
     return scene;
 }
