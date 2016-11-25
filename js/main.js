@@ -70,16 +70,21 @@ function createScene(engine){
     camera.radius *= 2;
     Game.Car.camera = camera;
 
-    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(-0, 700, 0), scene);
+    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 700, 0), scene);
     camera2.setTarget(BABYLON.Vector3.Zero());
     //scene.activeCamera = camera2;
 
     //WORLD
     Game.createWorld(scene);
     var checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
+    //checkpoints -> x, z coordinates of checkpoints
     var radius = 80; //radius of checkpoint, sphere
     var players = Game.createPlayers(scene, checkpoints); //creates players & checkpoint positions
-    var checkpointIndex = startingPositions(players.length, checkpoints.length); //2D array of indexes of current positions of players
+    var checkpointIndex = startingPositions(players.length, checkpoints.length); 
+    //2D boolean array of indexes of current positions of players
+    //lines == player index, columns == checkpoint index
+    //if cell == true, last passed checkpoint of a player
+    
     //CAR
     var car = Game.createCar(scene);
     camera.target = (Game.Car.chassis);
@@ -95,10 +100,10 @@ function createScene(engine){
     halfPosition = true;
     car = Game.Car.chassis;
 
-    var playerIndex = 0;
-    var player = players[playerIndex]; //player == index of player in players[]
-    var currIndex = getCurrIndex(checkpointIndex[playerIndex]); //0 == player index, need to set next checkpoint
-    movePlayer(players, playerIndex, checkpoints, currIndex); //checkpoints -> x, z coordinates of checkpoints
+    var playerIndex = 0; //player == players[playerIndex]
+    //todo: another loop for all players
+    var currIndex = getCurrIndex(checkpointIndex[playerIndex]); //returns the passed checkpoint of a player
+    movePlayer(players, playerIndex, checkpoints, currIndex); //move player from point a to b
     
     scene.registerBeforeRender(function (){
         if(halfPosition){
@@ -149,45 +154,43 @@ function checkIfCheckpointReached(scene, players, playerIndex, checkpoints, chec
     var x = (playerX-checkpoints[currCheckpointIndex+1][0])*(playerX-checkpoints[currCheckpointIndex+1][0]);
     var z = (playerZ-checkpoints[currCheckpointIndex+1][1])*(playerZ-checkpoints[currCheckpointIndex+1][1]);
     var r = (radius/2)*(radius/2);
-    if(x + z < r){
+    if(x + z < r){ //check if player has reached the checkpoint
         checkpointIndex[playerIndex][currCheckpointIndex] = false;
         checkpointIndex[playerIndex][currCheckpointIndex+1] = true;
         var next = getCurrIndex(checkpointIndex[playerIndex]);
-        return next;   
+        return next; //return the next checkpoint
     }  
 }
 
 function movePlayer(players, playerIndex, checkpoints, checkpointIndex){
     console.log(checkpointIndex, checkpointIndex+1); //med 0. in 1. checkpoint
     var speed = Math.floor((Math.random() * 4) + 2);
-    //player.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]));
     var move = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", speed, 20, 
         new BABYLON.Vector3(checkpoints[checkpointIndex][0], 5, checkpoints[checkpointIndex][1]), new BABYLON.Vector3(checkpoints[checkpointIndex+1][0], 5, checkpoints[checkpointIndex+1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-        //start position, finish position
 }
 
 function movePlayerNext(players, playerIndex, checkpoints, checkpointIndex){
     console.log(checkpointIndex, checkpointIndex+1); //med 1. in 2. checkpoint... a ne dela!!
     var speedN = Math.floor((Math.random() * 4) + 2);
-    players[playerIndex].visibility = 0.5; //zazna ampak se ne prozi premik proti naslednjem checkpointu
     var moveN = BABYLON.Animation.CreateAndStartAnimation("moveN", players[playerIndex], "positionN", speedN, 20,
         players[playerIndex].position, new BABYLON.Vector3(checkpoints[checkpointIndex+1][0], 5, checkpoints[checkpointIndex+1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 }
 
-function startingPositions(numPlayers, numCheckpoints){
+function startingPositions(numPlayers, numCheckpoints){ //sets starting positions of players
     var indexes = [];
     for(var k = 0; k<numPlayers; k++){
         var arr = [];
         for(var l = 0; l<numCheckpoints; l++){
             arr[l] = false;
         }
-        arr[0] = true; //starting position of player = index 0 of checkpoints
+        arr[0] = true; //first passed, index 0, only can detect next checkpoint
         indexes.push(arr);
     }
     return indexes;
 }
 
-function getCurrIndex(playerCheckpoints){
+function getCurrIndex(playerCheckpoints){ 
+//get index of current passed checkpoint, movement will be between this and next one; +1
     for(var i = 0; i<playerCheckpoints.length; i++){
         if(playerCheckpoints[i] == true){
             return i;

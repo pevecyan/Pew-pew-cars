@@ -57,6 +57,7 @@ var Game = {
             checkpoint.visibility = 0.4;   
         }
 
+        //create player, add to array
         var player1 = BABYLON.Mesh.CreateSphere("p1", 5, 10, scene);
         player1.position = new BABYLON.Vector3(checkpoints[0][0], 5, checkpoints[0][1]);
         player1.material = new BABYLON.StandardMaterial('texturep1', scene);
@@ -267,7 +268,7 @@ var Game = {
 
             bulletParticles(Game.Scene, bullet);
 
-            //check if enemy was hit
+            //check if any of enemies was hit, todo: reduce health
             for(var j = 0; j<players.length; j++){
                 players[j].physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
                     collided.object.setEnabled(0);
