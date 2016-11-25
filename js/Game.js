@@ -12,7 +12,7 @@ var Game = {
             });
         });
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/asphalt.jpg", scene);
+        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/sand.jpg", scene);
         ground.material = groundMaterial;
 
         ground.applyGravity = true;
@@ -44,17 +44,32 @@ var Game = {
         half.position = new BABYLON.Vector3(460, 9, 0);  
         half.material = new BABYLON.StandardMaterial('textureh', scene);
         half.material.diffuseColor = new BABYLON.Color3(1, 1, 0);
-        half.visibility = 0.4;
-
+        half.visibility = 0.4;   
+        
+    },
+    createPlayers:function(scene){
         //test box
         test = BABYLON.Mesh.CreateBox("test", 10.0, scene);
-        test.position = new BABYLON.Vector3(0, 100, -50);  
+        test.position = new BABYLON.Vector3(0, 10, -50);  
         test.material = new BABYLON.StandardMaterial('textureh', scene);
         test.material.diffuseColor = new BABYLON.Color3(1, 0, 0);
         test.applyGravity = true;
         test.ellipsoid = new BABYLON.Vector3(10.0, 10.0, 10.0);
         test.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 100 });
         test.checkCollisions = true;
+
+        var checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
+        //create checkpoints
+        var radius = 80;
+        for(var i = 0; i<checkpoints.length; i++){
+            var checkpoint = BABYLON.Mesh.CreateSphere("check"+i, 2, radius, scene);
+            checkpoint.position = new BABYLON.Vector3(checkpoints[i][0], 0, checkpoints[i][1]);
+            checkpoint.material = new BABYLON.StandardMaterial('texturec', scene);
+            checkpoint.material.diffuseColor = new BABYLON.Color3(1, 0, 1);
+            checkpoint.visibility = 0.4;   
+        }
+
+        
         
     },
     createCar:function(scene){
@@ -243,7 +258,8 @@ var Game = {
             }, Game.Scene);
             
             bullet.position = new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z);
-            
+            console.log(Game.Car.chassis.position.x+" "+Game.Car.chassis.position.z);
+
             var direction = Game.Car.chassis.position.subtract(Game.Car.aim.getAbsolutePosition());
 
             bullet.applyGravity = true;
