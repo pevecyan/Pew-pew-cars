@@ -1,5 +1,6 @@
 var test;
 var ground;
+var players = [];
 
 var Game = {
     createWorld:function(scene){
@@ -47,7 +48,7 @@ var Game = {
         half.visibility = 0.4;   
         
     },
-    createPlayers:function(scene){
+    createPlayers:function(scene, checkpoints){
         //test box
         test = BABYLON.Mesh.CreateBox("test", 10.0, scene);
         test.position = new BABYLON.Vector3(0, 10, -50);  
@@ -57,8 +58,7 @@ var Game = {
         test.ellipsoid = new BABYLON.Vector3(10.0, 10.0, 10.0);
         test.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 100 });
         test.checkCollisions = true;
-
-        var checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
+        
         //create checkpoints
         var radius = 80;
         for(var i = 0; i<checkpoints.length; i++){
@@ -69,8 +69,26 @@ var Game = {
             checkpoint.visibility = 0.4;   
         }
 
+        var player1 = BABYLON.Mesh.CreateSphere("p1", 5, 10, scene);
+        player1.position = new BABYLON.Vector3(checkpoints[0][0], 5, checkpoints[0][1]);
+        player1.material = new BABYLON.StandardMaterial('texturep1', scene);
+        player1.material.diffuseColor = new BABYLON.Color3(0, 1, 1);
+        player1.applyGravity = true;
+        player1.ellipsoid = new BABYLON.Vector3(5,5,5);
+        player1.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 3 });
+        player1.checkCollisions = true;
+
+        players.push(player1);
+
+        //player1.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]));
+
+        var speed = 2;
+        var move = BABYLON.Animation.CreateAndStartAnimation("move", player1, "position", speed, 20, 
+            new BABYLON.Vector3(checkpoints[0][0], 5, checkpoints[0][1]), new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
         
-        
+
+        return players;
     },
     createCar:function(scene){
         var width = 10;
@@ -258,7 +276,7 @@ var Game = {
             }, Game.Scene);
             
             bullet.position = new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z);
-            console.log(Game.Car.chassis.position.x+" "+Game.Car.chassis.position.z);
+            //console.log(Game.Car.chassis.position.x+" "+Game.Car.chassis.position.z);
 
             var direction = Game.Car.chassis.position.subtract(Game.Car.aim.getAbsolutePosition());
 
@@ -273,6 +291,14 @@ var Game = {
                 collided.object.setEnabled(0);
                 main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
             }); 
+
+            //check if enemy was hit
+            for(var j = 0; j<players.length; j++){
+                players[j].physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
+                    collided.object.setEnabled(0);
+                    main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+                }); 
+            }
             
             var k = {startPostion:new BABYLON.Vector3(Game.Car.chassis.position.x,Game.Car.chassis.position.y+2,Game.Car.chassis.position.z), bullet:bullet, direction: new BABYLON.Vector3(direction.x,direction.y,direction.z)};
             Game.Car.bullets.push(k);

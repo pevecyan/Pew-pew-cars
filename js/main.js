@@ -80,12 +80,14 @@ function createScene(engine){
     camera.radius *= 2;
     Game.Car.camera = camera;
 
-    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(-200, 700, 700), scene);
+    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(-0, 700, 0), scene);
     camera2.setTarget(BABYLON.Vector3.Zero());
     //scene.activeCamera = camera2;
 
+    var checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
+    var radius = 80; //radius of checkpoint, sphere
     Game.createWorld(scene);
-    Game.createPlayers(scene);
+    var players = Game.createPlayers(scene, checkpoints);
     //CAR
     var car = Game.createCar(scene);
     
@@ -107,7 +109,16 @@ function createScene(engine){
         }
         if(finishPosition){
             checkHalfLine(car);
-        }           
+        }     
+        var playerX = players[0].position.x;
+        var playerZ = players[0].position.z;
+        var x = (playerX-checkpoints[1][0])*(playerX-checkpoints[1][0]);
+        var z = (playerZ-checkpoints[1][1])*(playerZ-checkpoints[1][1]);
+        var r = (radius/2)*(radius/2);
+        if(x + z < r){
+            console.log("GOTIT");
+        }  
+
     });
 
     return scene;
