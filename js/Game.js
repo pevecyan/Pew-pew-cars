@@ -1,10 +1,8 @@
-var test;
 var ground;
 var players = [];
 
 var Game = {
     createWorld:function(scene){
-        //ground
         ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 20, scene, false, function() {
         ground.position = new BABYLON.Vector3(100,0,0);
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
@@ -15,12 +13,10 @@ var Game = {
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
         groundMaterial.diffuseTexture = new BABYLON.Texture("assets/sand.jpg", scene);
         ground.material = groundMaterial;
-
         ground.applyGravity = true;
-        //ground.ellipsoid = new BABYLON.Vector3(1000.0, 1.0, 1000.0);  
         ground.checkCollisions = true; 
 
-        //Skybox
+        //skybox
         var skybox = BABYLON.Mesh.CreateBox("skyBox", 1500.0, scene); 
         skybox.position = new BABYLON.Vector3(0, 30.1, 0); 
         var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene); 
@@ -31,6 +27,7 @@ var Game = {
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0); 
         skybox.material = skyboxMaterial; 
 
+        //finish line position
         var finish = BABYLON.Mesh.CreateBox("finish", 20.0, scene);
         finish.scaling.x = 10;
         finish.scaling.y = 0.8;
@@ -39,6 +36,7 @@ var Game = {
         finish.material.diffuseColor = new BABYLON.Color3(1, 1, 0);
         finish.visibility = 0.4;
 
+        //half line position
         var half = BABYLON.Mesh.CreateBox("half", 20.0, scene);
         half.scaling.x = 10;
         half.scaling.y = 0.8;
@@ -48,17 +46,7 @@ var Game = {
         half.visibility = 0.4;   
         
     },
-    createPlayers:function(scene, checkpoints){
-        //test box
-        test = BABYLON.Mesh.CreateBox("test", 10.0, scene);
-        test.position = new BABYLON.Vector3(0, 10, -50);  
-        test.material = new BABYLON.StandardMaterial('textureh', scene);
-        test.material.diffuseColor = new BABYLON.Color3(1, 0, 0);
-        test.applyGravity = true;
-        test.ellipsoid = new BABYLON.Vector3(10.0, 10.0, 10.0);
-        test.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 100 });
-        test.checkCollisions = true;
-        
+    createPlayers:function(scene, checkpoints){      
         //create checkpoints
         var radius = 80;
         for(var i = 0; i<checkpoints.length; i++){
@@ -81,12 +69,6 @@ var Game = {
         players.push(player1);
 
         //player1.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]));
-
-        var speed = 2;
-        var move = BABYLON.Animation.CreateAndStartAnimation("move", player1, "position", speed, 20, 
-            new BABYLON.Vector3(checkpoints[0][0], 5, checkpoints[0][1]), new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-        
 
         return players;
     },
@@ -286,11 +268,6 @@ var Game = {
             bullet.checkCollisions = true;  
 
             bulletParticles(Game.Scene, bullet);
-
-            test.physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
-                collided.object.setEnabled(0);
-                main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
-            }); 
 
             //check if enemy was hit
             for(var j = 0; j<players.length; j++){

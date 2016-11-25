@@ -4,6 +4,7 @@ var chassis;
 var finishPosition;
 var halfPosition;
 var laps = 17;
+var go = false;
 
 function initialize(){
     //input
@@ -20,13 +21,8 @@ function initialize(){
 
 
 function initializeEngine(){
-    // get the canvas DOM element
     var canvas = document.getElementById('renderCanvas');
-
-    // load the 3D engine
     var engine = new BABYLON.Engine(canvas, true);
-    
-    // call the createScene function
     var scene = createScene(engine);
 
     //BABYLON.SceneLoader.ImportMesh("", "assets/", "tree.babylon", scene, function (models) { 
@@ -52,9 +48,6 @@ function initializeEngine(){
         //chassis.rotationQuaternion = chassis.rotationQuaternion.add(BABYLON.Quaternion.RotationAlphaBetaGamma(0, 0, 0));
     //});
 
-    
-
-    // run the render loop
     engine.runRenderLoop(function(){
         scene.render();
     });
@@ -69,13 +62,11 @@ function createScene(engine){
     scene.gravity = gravity
     scene.enablePhysics(gravity, new BABYLON.CannonJSPlugin());
     scene.collisionsEnabled = true;
-
     //scene.getPhysicsEngine().setTimeStep(1/10000)
     
     var light = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0.2), scene);
     light.groundColor = new BABYLON.Color3(.2, .2, .2);
 
-    // Camera
     var camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
     camera.radius *= 2;
     Game.Car.camera = camera;
@@ -84,13 +75,14 @@ function createScene(engine){
     camera2.setTarget(BABYLON.Vector3.Zero());
     //scene.activeCamera = camera2;
 
+    //WORLD
+    Game.createWorld(scene);
     var checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
     var radius = 80; //radius of checkpoint, sphere
-    Game.createWorld(scene);
-    var players = Game.createPlayers(scene, checkpoints);
+    var players = Game.createPlayers(scene, checkpoints); //creates players & checkpoint positions
+    var checkpointIndex = startingPositions(players.length, checkpoints.length); //2D array of indexes of current positions of players
     //CAR
     var car = Game.createCar(scene);
-    
     camera.target = (Game.Car.chassis);
 
     document.onkeydown = Game.keyboardHandler;
@@ -99,25 +91,24 @@ function createScene(engine){
     scene.registerAfterRender(Game.Car.update);
     Game.Scene = scene;
 
+    //GAMEPLAY
     finishPosition = false;
     halfPosition = true;
     car = Game.Car.chassis;
+
+    var playerIndex = 0;
+    var player = players[playerIndex]; //player == index of player in players[]
+    var currIndex = getCurrIndex(checkpointIndex[playerIndex]); //0 == player index, need to set next checkpoint
+    movePlayer(players, playerIndex, checkpoints, currIndex); //checkpoints -> x, z coordinates of checkpoints
     
-    scene.registerBeforeRender(function () {
+    scene.registerBeforeRender(function (){
         if(halfPosition){
             checkFinishLine(car);
         }
         if(finishPosition){
             checkHalfLine(car);
         }     
-        var playerX = players[0].position.x;
-        var playerZ = players[0].position.z;
-        var x = (playerX-checkpoints[1][0])*(playerX-checkpoints[1][0]);
-        var z = (playerZ-checkpoints[1][1])*(playerZ-checkpoints[1][1]);
-        var r = (radius/2)*(radius/2);
-        if(x + z < r){
-            console.log("GOTIT");
-        }  
+        checkIfCheckpointReached(players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
 
     });
 
@@ -148,4 +139,55 @@ function checkHalfLine(car){
         finishPosition = false;
         halfPosition = true;
     } 
+}
+
+//CHECKPOINTS OF PLAYERS - ENEMIES
+function checkIfCheckpointReached(players, playerIndex, checkpoints, checkpointIndex, currCheckpointIndex, radius){
+    var playerX = players[playerIndex].position.x;
+    var playerZ = players[playerIndex].position.z;
+    var x = (playerX-checkpoints[currCheckpointIndex+1][0])*(playerX-checkpoints[currCheckpointIndex+1][0]);
+    var z = (playerZ-checkpoints[currCheckpointIndex+1][1])*(playerZ-checkpoints[currCheckpointIndex+1][1]);
+    var r = (radius/2)*(radius/2);
+    if(x + z < r){
+        //console.log("GOTIT");
+        checkpointIndex[playerIndex][currCheckpointIndex] = false;
+        checkpointIndex[playerIndex][currCheckpointIndex+1] = true;
+        var next = getCurrIndex(checkpointIndex[playerIndex]);
+        movePlayerNext(players, playerIndex, checkpoints, next);
+    }  
+}
+
+function movePlayer(players, playerIndex, checkpoints, checkpointIndex){
+    var speed = Math.floor((Math.random() * 5) + 1);
+    //player.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]));
+    var move = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", speed, 20, 
+        new BABYLON.Vector3(checkpoints[checkpointIndex][0], 5, checkpoints[checkpointIndex][1]), new BABYLON.Vector3(checkpoints[checkpointIndex+1][0], 5, checkpoints[checkpointIndex+1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        //start position, finish position
+}
+
+function movePlayerNext(players, playerIndex, checkpoints, checkpointIndex){
+    var speed = Math.floor((Math.random() * 5) + 1);
+    var moveN = BABYLON.Animation.CreateAndStartAnimation("moveN", players[playerIndex], "position", speed, 20, 
+        new BABYLON.Vector3(players[playerIndex].position.x, 5, players[playerIndex].position.z), new BABYLON.Vector3(checkpoints[checkpointIndex][0], 5, checkpoints[checkpointIndex][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+}
+
+function startingPositions(numPlayers, numCheckpoints){
+    var indexes = [];
+    for(var k = 0; k<numPlayers; k++){
+        var arr = [];
+        for(var l = 0; l<numCheckpoints; l++){
+            arr[l] = false;
+        }
+        arr[0] = true; //starting position of player = index 0 of checkpoints
+        indexes.push(arr);
+    }
+    return indexes;
+}
+
+function getCurrIndex(playerCheckpoints){
+    for(var i = 0; i<playerCheckpoints.length; i++){
+        if(playerCheckpoints[i] == true){
+            return i;
+        }
+    }
 }
