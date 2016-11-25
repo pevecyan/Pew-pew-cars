@@ -70,11 +70,13 @@ function createScene(engine){
     camera.radius *= 2;
     Game.Car.camera = camera;
 
-    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 700, 0), scene);
+    var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 500, 0), scene);
     camera2.setTarget(BABYLON.Vector3.Zero());
     //scene.activeCamera = camera2;
 
-    //WORLD
+var canvas = document.getElementById('renderCanvas');
+    camera2.attachControl(canvas);
+
     Game.createWorld(scene);
     checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
     //checkpoints -> x, z coordinates of checkpoints

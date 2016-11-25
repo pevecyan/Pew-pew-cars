@@ -14,7 +14,7 @@ var Game = {
             });
         });
         var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/sand.jpg", scene);
+        groundMaterial.diffuseTexture = new BABYLON.Texture("assets/racetrackTexture.png", scene);
         ground.material = groundMaterial;
         ground.applyGravity = true;
         ground.checkCollisions = true; 
@@ -47,6 +47,16 @@ var Game = {
         half.material = new BABYLON.StandardMaterial('textureh', scene);
         half.material.diffuseColor = new BABYLON.Color3(1, 1, 0);
         half.visibility = 0.4;   
+        
+        BABYLON.SceneLoader.ImportMesh("","assets/", "rock1.babylon", scene, 
+			function (models) { 
+                models[0].position = new BABYLON.Vector3(-20, 0, -60);  
+				models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+                models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+		    }
+        );
+        addTrees(scene);
+
         
     },
     createPlayers:function(scene, checkpoints){      
@@ -408,4 +418,58 @@ function bulletParticles(scene, bullet){
     particleSystem.maxEmitPower = 10;
     particleSystem.updateSpeed = 0.01;
     particleSystem.start(); 
+}
+
+
+function addTrees(scene){
+    BABYLON.SceneLoader.ImportMesh("","assets/", "pine1.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(-20, 10, -60);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    BABYLON.SceneLoader.ImportMesh("","assets/", "pine1.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(-100, 10, -30);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    BABYLON.SceneLoader.ImportMesh("","assets/", "pine1.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(50, 10, -70);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    BABYLON.SceneLoader.ImportMesh("","assets/", "tree.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(80, 20, -90);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    BABYLON.SceneLoader.ImportMesh("","assets/", "pine2.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(130, 10, -170);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    BABYLON.SceneLoader.ImportMesh("","assets/", "tree.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(-130, 0, -410);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    BABYLON.SceneLoader.ImportMesh("","assets/", "pine1.babylon", scene, 
+        function (models) { 
+            models[0].position = new BABYLON.Vector3(130, 10, -250);  
+            models[0].scaling = new BABYLON.Vector3(1.0, 1.0, 1.0); 
+            models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
+        }
+    );
+    
 }
