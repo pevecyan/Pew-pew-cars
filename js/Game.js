@@ -67,9 +67,7 @@ var Game = {
         player1.checkCollisions = true;
 
         players.push(player1);
-
-        //player1.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]));
-
+   
         return players;
     },
     createCar:function(scene){

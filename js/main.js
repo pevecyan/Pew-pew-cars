@@ -4,7 +4,6 @@ var chassis;
 var finishPosition;
 var halfPosition;
 var laps = 17;
-var go = false;
 
 function initialize(){
     //input
@@ -108,8 +107,10 @@ function createScene(engine){
         if(finishPosition){
             checkHalfLine(car);
         }     
-        checkIfCheckpointReached(players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
-
+        var next = checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
+        if(next != undefined){
+             movePlayerNext(players, playerIndex, checkpoints, next);
+        }
     });
 
     return scene;
@@ -142,23 +143,23 @@ function checkHalfLine(car){
 }
 
 //CHECKPOINTS OF PLAYERS - ENEMIES
-function checkIfCheckpointReached(players, playerIndex, checkpoints, checkpointIndex, currCheckpointIndex, radius){
+function checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currCheckpointIndex, radius){
     var playerX = players[playerIndex].position.x;
     var playerZ = players[playerIndex].position.z;
     var x = (playerX-checkpoints[currCheckpointIndex+1][0])*(playerX-checkpoints[currCheckpointIndex+1][0]);
     var z = (playerZ-checkpoints[currCheckpointIndex+1][1])*(playerZ-checkpoints[currCheckpointIndex+1][1]);
     var r = (radius/2)*(radius/2);
     if(x + z < r){
-        //console.log("GOTIT");
         checkpointIndex[playerIndex][currCheckpointIndex] = false;
         checkpointIndex[playerIndex][currCheckpointIndex+1] = true;
         var next = getCurrIndex(checkpointIndex[playerIndex]);
-        movePlayerNext(players, playerIndex, checkpoints, next);
+        return next;   
     }  
 }
 
 function movePlayer(players, playerIndex, checkpoints, checkpointIndex){
-    var speed = Math.floor((Math.random() * 5) + 1);
+    console.log(checkpointIndex, checkpointIndex+1); //med 0. in 1. checkpoint
+    var speed = Math.floor((Math.random() * 4) + 2);
     //player.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(checkpoints[1][0], 5, checkpoints[1][1]));
     var move = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", speed, 20, 
         new BABYLON.Vector3(checkpoints[checkpointIndex][0], 5, checkpoints[checkpointIndex][1]), new BABYLON.Vector3(checkpoints[checkpointIndex+1][0], 5, checkpoints[checkpointIndex+1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -166,9 +167,11 @@ function movePlayer(players, playerIndex, checkpoints, checkpointIndex){
 }
 
 function movePlayerNext(players, playerIndex, checkpoints, checkpointIndex){
-    var speed = Math.floor((Math.random() * 5) + 1);
-    var moveN = BABYLON.Animation.CreateAndStartAnimation("moveN", players[playerIndex], "position", speed, 20, 
-        new BABYLON.Vector3(players[playerIndex].position.x, 5, players[playerIndex].position.z), new BABYLON.Vector3(checkpoints[checkpointIndex][0], 5, checkpoints[checkpointIndex][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    console.log(checkpointIndex, checkpointIndex+1); //med 1. in 2. checkpoint... a ne dela!!
+    var speedN = Math.floor((Math.random() * 4) + 2);
+    players[playerIndex].visibility = 0.5; //zazna ampak se ne prozi premik proti naslednjem checkpointu
+    var moveN = BABYLON.Animation.CreateAndStartAnimation("moveN", players[playerIndex], "positionN", speedN, 20,
+        players[playerIndex].position, new BABYLON.Vector3(checkpoints[checkpointIndex+1][0], 5, checkpoints[checkpointIndex+1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 }
 
 function startingPositions(numPlayers, numCheckpoints){
