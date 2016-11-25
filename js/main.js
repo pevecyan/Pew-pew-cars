@@ -76,11 +76,11 @@ function createScene(engine){
 
     //WORLD
     Game.createWorld(scene);
-    var checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
+    checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
     //checkpoints -> x, z coordinates of checkpoints
     var radius = 80; //radius of checkpoint, sphere
     var players = Game.createPlayers(scene, checkpoints); //creates players & checkpoint positions
-    var checkpointIndex = startingPositions(players.length, checkpoints.length); 
+    checkpointIndex = startingPositions(players.length, checkpoints.length); 
     //2D boolean array of indexes of current positions of players
     //lines == player index, columns == checkpoint index
     //if cell == true, last passed checkpoint of a player
@@ -100,10 +100,10 @@ function createScene(engine){
     halfPosition = true;
     car = Game.Car.chassis;
 
-    var playerIndex = 0; //player == players[playerIndex]
+    //var playerIndex = 0; //player == players[playerIndex]
     //todo: another loop for all players
-    var currIndex = getCurrIndex(checkpointIndex[playerIndex]); //returns the passed checkpoint of a player
-    movePlayer(players, playerIndex, checkpoints, currIndex); //move player from point a to b
+    //var currIndex = getCurrIndex(checkpointIndex[playerIndex]); //returns the passed checkpoint of a player
+    //movePlayer(players, playerIndex, checkpoints, currIndex); //move player from point a to b
     
     scene.registerBeforeRender(function (){
         if(halfPosition){
@@ -112,9 +112,14 @@ function createScene(engine){
         if(finishPosition){
             checkHalfLine(car);
         }     
-        var next = checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
-        if(next != undefined){
-             movePlayerNext(players, playerIndex, checkpoints, next);
+
+        //var next = checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
+        //if(next != undefined){
+        //     movePlayerNext(players, playerIndex, checkpoints, next);
+        //}
+        if(isPlayerInCheckpoint(0)){
+            playersCheckpointsIndexes[0] =(playersCheckpointsIndexes[0]+1)%checkpoints.length;
+            movePlayer(0, checkpoints);
         }
     });
 
@@ -147,6 +152,18 @@ function checkHalfLine(car){
     } 
 }
 
+function isPlayerInCheckpoint(playerIndex){
+    var radius = 80;
+    var playerX = players[playerIndex].position.x;
+    var playerZ = players[playerIndex].position.z;
+    var x = (playerX-checkpoints[playersCheckpointsIndexes[playerIndex]][0])*(playerX-checkpoints[playersCheckpointsIndexes[playerIndex]][0]);
+    var z = (playerZ-checkpoints[playersCheckpointsIndexes[playerIndex]][1])*(playerZ-checkpoints[playersCheckpointsIndexes[playerIndex]][1]);
+    var r = (radius/2)*(radius/2);
+    if(x+z < r){
+        return true;
+    }
+}
+/*
 //CHECKPOINTS OF PLAYERS - ENEMIES
 function checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currCheckpointIndex, radius){
     var playerX = players[playerIndex].position.x;
@@ -172,8 +189,14 @@ function movePlayer(players, playerIndex, checkpoints, checkpointIndex){
 function movePlayerNext(players, playerIndex, checkpoints, checkpointIndex){
     console.log(checkpointIndex, checkpointIndex+1); //med 1. in 2. checkpoint... a ne dela!!
     var speedN = Math.floor((Math.random() * 4) + 2);
-    var moveN = BABYLON.Animation.CreateAndStartAnimation("moveN", players[playerIndex], "positionN", speedN, 20,
-        players[playerIndex].position, new BABYLON.Vector3(checkpoints[checkpointIndex+1][0], 5, checkpoints[checkpointIndex+1][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    var moveN = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", speedN, 20,
+        players[playerIndex].position, new BABYLON.Vector3(checkpoints[checkpointIndex][0], 5, checkpoints[checkpointIndex][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+}
+*/
+function movePlayer(playerIndex, checkpoints){
+    var speed = 200;
+    var move = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", 30, speed, 
+        players[playerIndex].position, new BABYLON.Vector3(checkpoints[playersCheckpointsIndexes[playerIndex]][0], 5, checkpoints[playersCheckpointsIndexes[playerIndex]][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 }
 
 function startingPositions(numPlayers, numCheckpoints){ //sets starting positions of players

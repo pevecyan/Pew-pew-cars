@@ -1,5 +1,8 @@
 var ground;
 var players = [];
+var playersCheckpointsIndexes = [];
+var checkpointIndex;
+var checkpoints = [];
 
 var Game = {
     createWorld:function(scene){
@@ -68,6 +71,8 @@ var Game = {
         player1.checkCollisions = true;
 
         players.push(player1);
+
+        playersCheckpointsIndexes.push(0);
    
         return players;
     },
