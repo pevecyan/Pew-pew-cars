@@ -181,15 +181,16 @@ var Game = {
         });
 
         //Car
-        BABYLON.SceneLoader.ImportMesh("","assets/", "ONEcar_purplecombo.babylon", scene, 
+        BABYLON.SceneLoader.ImportMesh("","assets/", "car_blank.babylon", scene, 
             function (models) { 
                 //models[0].scaling = new BABYLON.Vector3(1.0, 1.0,1.0); 
                 //models[0].position = new BABYLON.Vector3(-50,100, 0); 
                 for(var i = 0; i < models.length; i++){
                     models[i].scaling = new BABYLON.Vector3(2.0, 2.0,2.0); 
-                    models[i].position = new BABYLON.Vector3(0,40, 0);  
+                    models[i].position = new BABYLON.Vector3(0,0, 0);  
                     //models[i].physicsImpostor = new BABYLON.PhysicsImpostor(models[i], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
                 }    
+            models[0].parent = Game.Car.chassis;
             }
         );
 
