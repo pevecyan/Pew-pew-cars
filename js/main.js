@@ -5,7 +5,19 @@ var finishPosition;
 var halfPosition;
 var laps = 17;
 
-function initialize(){
+var camera;
+var backCamera;
+
+var gameStarted = false;
+
+
+function play(){
+    document.getElementById("menu").style.display = "none";
+    gameStarted = true;
+}
+
+function initialize(){ 
+
     //input
     listener = new window.keypress.Listener();
 
@@ -66,19 +78,27 @@ function createScene(engine){
     var light = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0.2), scene);
     light.groundColor = new BABYLON.Color3(.2, .2, .2);
 
-    var camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
+    camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
     camera.radius *= 2;
     Game.Car.camera = camera;
 
+    backCamera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 1, -15), scene);//new BABYLON.FollowCamera("Camera2", new BABYLON.Vector3(0, 100, 0), scene);
+    backCamera.position = camera.position;
+    //scene.activeCamera = backCamera;
+    
+
+    
+
+
     var camera2 = new BABYLON.FreeCamera("Camera2", new BABYLON.Vector3(0, 500, 0), scene);
     camera2.setTarget(BABYLON.Vector3.Zero());
-    //scene.activeCamera = camera2;
+    scene.activeCamera = camera2;
 
-var canvas = document.getElementById('renderCanvas');
+    var canvas = document.getElementById('renderCanvas');
     camera2.attachControl(canvas);
 
     Game.createWorld(scene);
-    checkpoints = [[-180,-9],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-260,70]];
+    checkpoints = [[-100,-200],[-97,-280],[150,-415],[420,-210],[490,350],[240,345],[-200,250],[-290,150],[-250,50]];
     //checkpoints -> x, z coordinates of checkpoints
     var radius = 80; //radius of checkpoint, sphere
     var players = Game.createPlayers(scene, checkpoints); //creates players & checkpoint positions
@@ -108,20 +128,36 @@ var canvas = document.getElementById('renderCanvas');
     //movePlayer(players, playerIndex, checkpoints, currIndex); //move player from point a to b
     
     scene.registerBeforeRender(function (){
-        if(halfPosition){
-            checkFinishLine(car);
-        }
-        if(finishPosition){
-            checkHalfLine(car);
-        }     
+        if(gameStarted){
+            backCamera.position = Game.Car.chassis.position.clone();
+            backCamera.position.y += 2;
+            backCamera.rotationQuaternion  = Game.Car.chassis.rotationQuaternion ;
+            if(Game.Keyboard.back){
+                scene.activeCamera = backCamera;
+            }else{
+                scene.activeCamera = camera;
+            }
+            if(halfPosition){
+                checkFinishLine(car);
+            }
+            if(finishPosition){
+                checkHalfLine(car);
+            }     
 
-        //var next = checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
-        //if(next != undefined){
-        //     movePlayerNext(players, playerIndex, checkpoints, next);
-        //}
-        if(isPlayerInCheckpoint(0)){
-            playersCheckpointsIndexes[0] =(playersCheckpointsIndexes[0]+1)%checkpoints.length;
-            movePlayer(0, checkpoints);
+            //var next = checkIfCheckpointReached(scene, players, playerIndex, checkpoints, checkpointIndex, currIndex, radius);
+            //if(next != undefined){
+            //     movePlayerNext(players, playerIndex, checkpoints, next);
+            //}
+            for(var i = 0; i < players.length; i++){
+                if(playersCheckpointsIndexes[i] == -1){
+                    playersCheckpointsIndexes[i] = 0;
+                    movePlayer(i,checkpoints);
+                }
+                if(isPlayerInCheckpoint(i)){
+                    playersCheckpointsIndexes[i] =(playersCheckpointsIndexes[i]+1)%checkpoints.length;
+                    movePlayer(i, checkpoints);
+                }
+            }
         }
     });
 
@@ -196,9 +232,19 @@ function movePlayerNext(players, playerIndex, checkpoints, checkpointIndex){
 }
 */
 function movePlayer(playerIndex, checkpoints){
-    var speed = 200;
-    var move = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", 30, speed, 
-        players[playerIndex].position, new BABYLON.Vector3(checkpoints[playersCheckpointsIndexes[playerIndex]][0], 5, checkpoints[playersCheckpointsIndexes[playerIndex]][1]), BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    if(playerAnimation[playerIndex] != undefined){
+        playerAnimation[playerIndex].stop();
+    }
+    var radius = 80;
+    var speed = 0.3 - Math.random()*0.01;
+    var path= (new BABYLON.Vector3(checkpoints[playersCheckpointsIndexes[playerIndex]][0], 5, checkpoints[playersCheckpointsIndexes[playerIndex]][1])).subtract(players[playerIndex].position);
+
+    var destination = new BABYLON.Vector3(checkpoints[playersCheckpointsIndexes[playerIndex]][0] +10*Math.random()*3-2, 5, checkpoints[playersCheckpointsIndexes[playerIndex]][1] + 10* Math.random()*3-2);
+
+    playerAnimation[playerIndex] = BABYLON.Animation.CreateAndStartAnimation("move", players[playerIndex], "position", 30, speed*path.length(), 
+        players[playerIndex].position, destination , BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+
 }
 
 function startingPositions(numPlayers, numCheckpoints){ //sets starting positions of players

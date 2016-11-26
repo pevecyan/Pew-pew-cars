@@ -11,3 +11,68 @@ html, body {
     height  : 100%;
     touch-action: none;
 }
+
+.menu{
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    background-color:rgba(0, 0, 0,0.9);
+}
+.title{
+    color:white;
+    position: relative;
+    text-align: center;
+    margin-top: 100px;
+    font-size: 100px;
+    font-variant: small-caps;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+.playbutton{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    font-size: 25px;
+    font-variant: small-caps;
+    color:white;
+    position: relative;
+    width:200px;
+    padding: 10px;
+    background-color: dodgerblue;
+    border-radius: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 40px;
+    text-align: center;
+    border-bottom: 5px solid lightsteelblue;
+}
+.playbutton:hover{
+    margin-top: 41px;
+    border-bottom: 4px solid lightsteelblue;
+}
+.playbutton:active{
+    margin-top: 43px;
+    border-bottom: 2px solid lightsteelblue;
+}
+
+.credits{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-variant: small-caps;
+    position: absolute;
+    bottom: 0px;
+    left:0px;
+    right:0px;
+    color:white;
+    text-align: center;
+}
+.instructions{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-variant: small-caps;
+    margin-top: 20px;
+    position: relative;
+    text-align:  center;
+    color:white;
+    width:400px;
+    margin-left: auto;
+    margin-right: auto;
+}
