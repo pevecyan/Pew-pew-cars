@@ -118,11 +118,11 @@ var Game = {
         return players;
     },
     createCar:function(scene){
-        var width = 10;
-        var depth = 16;
+        var width = 6;
+        var depth = 8;
         var height = 0.1;
 
-        var wheelDiameter = 4;
+        var wheelDiameter = 3;
         var wheelDepthPosition = (depth + wheelDiameter) / 2
 
         var axisWidth = width + wheelDiameter;
@@ -137,7 +137,7 @@ var Game = {
         Game.Car.chassis.position.x  = -100;
         Game.Car.chassis.position.y =  30 + wheelDiameter + height / 2;
         Game.Car.chassis.physicsImpostor = new BABYLON.PhysicsImpostor(Game.Car.chassis, BABYLON.PhysicsEngine.BoxImpostor, {
-            mass:100,
+            mass:300,
             nativeParams: {
     		     //angularDamping: 10000,
 		    }
@@ -162,15 +162,16 @@ var Game = {
             wheel.rotation = new BABYLON.Vector3(0,0, Math.PI / 2);
             wheel.bakeCurrentTransformIntoVertices();
 
-            wheel.position.copyFromFloats(a * axisWidth / 2, wheelDiameter / 2, b * wheelDepthPosition)
+            wheel.position.copyFromFloats(a * axisWidth / 2-5, wheelDiameter / 2, b * wheelDepthPosition)
             //wheel.rotation.x = Math.PI/4;
             //wheel.rotation.y = Math.PI/4;
-            wheel.scaling.x = 0.8;
+            wheel.scaling.x = 0.4;
             
 
             wheel.physicsImpostor = new BABYLON.PhysicsImpostor(wheel, BABYLON.PhysicsEngine.SphereImpostor, {
-                friction:0.8,
-                mass: 40,
+                friction:0.5,
+                restitution:0,
+                mass: 100,
             });
             return wheel;
         });
@@ -185,12 +186,11 @@ var Game = {
             function (models) { 
                 //models[0].scaling = new BABYLON.Vector3(1.0, 1.0,1.0); 
                 //models[0].position = new BABYLON.Vector3(-50,100, 0); 
-                for(var i = 0; i < models.length; i++){
-                    models[i].scaling = new BABYLON.Vector3(2.0, 2.0,2.0); 
-                    models[i].position = new BABYLON.Vector3(0,0, 0);  
-                    //models[i].physicsImpostor = new BABYLON.PhysicsImpostor(models[i], BABYLON.PhysicsEngine.MeshImpostor, { mass: 0, friction: 0.5, restitution: 1 }, scene);   
-                }    
-            models[0].parent = Game.Car.chassis;
+                models[0].scaling = new BABYLON.Vector3(2.0, 2.0,2.0); 
+                models[0].position = new BABYLON.Vector3(0,-1, -0.5);  
+                models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[i], BABYLON.PhysicsEngine.MeshImpostor, { mass: 1, friction: 1, restitution: 0 }, scene);   
+                
+                models[0].parent = Game.Car.chassis;
             }
         );
 
@@ -198,21 +198,21 @@ var Game = {
 
         Game.Car.vehicle.addWheel({
             body: Game.Car.wheels[0].physicsImpostor.physicsBody,
-            position: new CANNON.Vec3(axisWidth / 2, 0, wheelDepthPosition).vadd(centerOfMassAdjust),
+            position: new CANNON.Vec3(axisWidth / 2-1, 0, wheelDepthPosition).vadd(centerOfMassAdjust),
             axis: new CANNON.Vec3(1, 0, 0),
             direction: down
         });
 
         Game.Car.vehicle.addWheel({
             body: Game.Car.wheels[1].physicsImpostor.physicsBody,
-            position: new CANNON.Vec3(-axisWidth / 2, 0, wheelDepthPosition).vadd(centerOfMassAdjust),
+            position: new CANNON.Vec3(-axisWidth / 2+1, 0, wheelDepthPosition).vadd(centerOfMassAdjust),
             axis: new CANNON.Vec3(-1, 0, 0),
             direction: down
         });
 
         Game.Car.vehicle.addWheel({
             body: Game.Car.wheels[2].physicsImpostor.physicsBody,
-            position: new CANNON.Vec3(axisWidth / 2, 0, -wheelDepthPosition).vadd(centerOfMassAdjust),
+            position: new CANNON.Vec3(axisWidth / 2-1, 0, -wheelDepthPosition).vadd(centerOfMassAdjust),
             axis: new CANNON.Vec3(1, 0, 0),
             direction: down,
             isFrontWheel:true
@@ -220,7 +220,7 @@ var Game = {
 
         Game.Car.vehicle.addWheel({
             body: Game.Car.wheels[3].physicsImpostor.physicsBody,
-            position: new CANNON.Vec3(-axisWidth / 2, 0, -wheelDepthPosition).vadd(centerOfMassAdjust),
+            position: new CANNON.Vec3(-axisWidth / 2+1, 0, -wheelDepthPosition).vadd(centerOfMassAdjust),
             axis: new CANNON.Vec3(-1, 0, 0),
             direction: down,
             isFrontWheel:true
