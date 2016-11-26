@@ -133,9 +133,9 @@ function createScene(engine){
             backCamera.position.y += 2;
             backCamera.rotationQuaternion  = Game.Car.chassis.rotationQuaternion ;
             if(Game.Keyboard.back){
-                scene.activeCamera = backCamera;
+                //scene.activeCamera = backCamera;
             }else{
-                scene.activeCamera = camera;
+                //scene.activeCamera = camera;
             }
             if(halfPosition){
                 checkFinishLine(car);
