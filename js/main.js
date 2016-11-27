@@ -3,7 +3,7 @@ var cylinder;
 var chassis;
 var finishPosition;
 var halfPosition;
-var laps = 17;
+var laps = 5;
 
 var camera;
 var backCamera;
@@ -13,6 +13,7 @@ var gameStarted = false;
 
 function play(){
     document.getElementById("menu").style.display = "none";
+    document.getElementById("laps").style.display = "block";
     gameStarted = true;
 }
 
@@ -78,7 +79,7 @@ function createScene(engine){
     var light = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0.2), scene);
     light.groundColor = new BABYLON.Color3(.2, .2, .2);
 
-    camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 0, 0), scene);
+    camera = new BABYLON.FollowCamera("Camera", new BABYLON.Vector3(0, 2, 0), scene);
     camera.radius *= 2;
     Game.Car.camera = camera;
 
@@ -129,9 +130,17 @@ function createScene(engine){
     
     scene.registerBeforeRender(function (){
         if(gameStarted){
+            document.getElementById("laps").innerText = "Lap: "+(5-laps)+"/5";
+
+            if(laps == 0){
+                document.getElementById("end").style.display = "block";
+                document.getElementById("laps").style.display = "none";
+                gameStarted = false;
+            }
+
             backCamera.position = Game.Car.chassis.position.clone();
-            backCamera.position.y += 2;
-            backCamera.rotationQuaternion  = Game.Car.chassis.rotationQuaternion ;
+            backCamera.position.y += 8
+            backCamera.rotationQuaternion  = Game.Car.chassis.rotationQuaternion;
             if(Game.Keyboard.back){
                 scene.activeCamera = backCamera;
             }else{
@@ -149,6 +158,7 @@ function createScene(engine){
             //     movePlayerNext(players, playerIndex, checkpoints, next);
             //}
             for(var i = 0; i < players.length; i++){
+                if(playersHealth[i] < 1) continue;
                 if(playersCheckpointsIndexes[i] == -1){
                     playersCheckpointsIndexes[i] = 0;
                     movePlayer(i,checkpoints);
@@ -175,7 +185,7 @@ function checkFinishLine(car){
         console.log("Remaining laps: "+laps);
         if(laps == 0){
             console.log("Finished!");
-            engine.stopRenderLoop();
+            //engine.stopRenderLoop();
         }
     } 
     
@@ -236,7 +246,7 @@ function movePlayer(playerIndex, checkpoints){
         playerAnimation[playerIndex].stop();
     }
     var radius = 80;
-    var speed = 0.3 - Math.random()*0.01;
+    var speed = 0.24 - Math.random()*0.01;
     var path= (new BABYLON.Vector3(checkpoints[playersCheckpointsIndexes[playerIndex]][0], 5, checkpoints[playersCheckpointsIndexes[playerIndex]][1])).subtract(players[playerIndex].position);
 
     var destination = new BABYLON.Vector3(checkpoints[playersCheckpointsIndexes[playerIndex]][0] +10*Math.random()*3-2, 5, checkpoints[playersCheckpointsIndexes[playerIndex]][1] + 10* Math.random()*3-2);

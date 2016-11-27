@@ -2,6 +2,7 @@ var ground;
 var players = [];
 var playerAnimation = [];
 var playersCheckpointsIndexes = [];
+var playersHealth = [];
 var checkpointIndex;
 var checkpoints = [];
 
@@ -88,6 +89,9 @@ var Game = {
         players.push(player1);
 
         playersCheckpointsIndexes.push(-1);
+        playersHealth.push(5);
+
+        
 
         var player2 = BABYLON.Mesh.CreateSphere("p1", 5, 10, scene);
         player2.position = new BABYLON.Vector3(-150, 5, 0);
@@ -101,6 +105,7 @@ var Game = {
         players.push(player2);
 
         playersCheckpointsIndexes.push(-1);
+        playersHealth.push(5);
 
         var player3 = BABYLON.Mesh.CreateSphere("p1", 5, 10, scene);
         player3.position = new BABYLON.Vector3(-200, 5, 0);
@@ -114,6 +119,7 @@ var Game = {
         players.push(player3);
 
         playersCheckpointsIndexes.push(-1);
+        playersHealth.push(5);
    
         return players;
     },
@@ -169,9 +175,9 @@ var Game = {
             
 
             wheel.physicsImpostor = new BABYLON.PhysicsImpostor(wheel, BABYLON.PhysicsEngine.SphereImpostor, {
-                friction:0.5,
+                friction:0.2,
                 restitution:0,
-                mass: 100,
+                mass: 50,
             });
             return wheel;
         });
@@ -188,7 +194,8 @@ var Game = {
                 //models[0].position = new BABYLON.Vector3(-50,100, 0); 
                 models[0].scaling = new BABYLON.Vector3(2.0, 2.0,2.0); 
                 models[0].position = new BABYLON.Vector3(0,-1, -0.5);  
-                models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[i], BABYLON.PhysicsEngine.MeshImpostor, { mass: 1, friction: 1, restitution: 0 }, scene);   
+                //models[0].rotation = new BABYLON.Vector3(0,0,0);
+                //models[0].physicsImpostor = new BABYLON.PhysicsImpostor(models[0], BABYLON.PhysicsEngine.BoxImpostor, { mass: 1, friction: 1, restitution: 0 }, scene);   
                 
                 models[0].parent = Game.Car.chassis;
             }
@@ -335,8 +342,18 @@ var Game = {
             //check if any of enemies was hit, todo: reduce health
             for(var j = 0; j<players.length; j++){
                 players[j].physicsImpostor.registerOnPhysicsCollide(bullet.physicsImpostor, function(main, collided) {
+
                     collided.object.setEnabled(0);
                     main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+                    for(var i = 0; i < players.length; i++){
+                        if(players[i] === main.object){
+                            playersHealth[i]--;
+
+                            if(playersHealth[i] < 1 && playerAnimation[i] != undefined)
+                                playerAnimation[i].stop();
+                            
+                        }
+                    }
                 }); 
             }
             
@@ -355,7 +372,7 @@ var Game = {
 
         },
         update: function(){
-            var maxSteerVal = Math.PI / 15;
+            var maxSteerVal = Math.PI / 30;
             var maxForce = 2500;
 
             //UP DOWN
@@ -417,7 +434,7 @@ var Game = {
             Game.Car.vehicle.setSteeringValue(Game.Car.currentSteer,2);
             Game.Car.vehicle.setSteeringValue(Game.Car.currentSteer,3);
 
-            //Game.Car.chassis.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0,0,0));
+            Game.Car.chassis.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0,0,0));
             
             //update bullets
             for(var i = 0; i < Game.Car.bullets.length; i++){
