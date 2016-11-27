@@ -4,6 +4,7 @@ var chassis;
 var finishPosition;
 var halfPosition;
 var laps = 5;
+var gScene;
 
 var camera;
 var backCamera;
@@ -14,7 +15,27 @@ var gameStarted = false;
 function play(){
     document.getElementById("menu").style.display = "none";
     document.getElementById("laps").style.display = "block";
-    gameStarted = true;
+
+    document.getElementById("countdown").style.display = "block";
+    setTimeout(function(){
+        gScene.activeCamera = camera;
+        //2
+        document.getElementById("countdown").innerText="2";
+        setTimeout(function(){
+            //1
+            document.getElementById("countdown").innerText="1";
+            setTimeout(function(){
+                //go
+                document.getElementById("countdown").innerText="GO";
+                gameStarted = true;
+                setTimeout(function(){
+                    document.getElementById("countdown").style.display = "none";
+                },1000);
+            },1000);
+        },1000);
+    },1000);
+
+    //gameStarted = true;
 }
 
 function initialize(){ 
@@ -36,7 +57,7 @@ function initializeEngine(){
     var canvas = document.getElementById('renderCanvas');
     var engine = new BABYLON.Engine(canvas, true);
     var scene = createScene(engine);
-
+    gScene = scene;
     //BABYLON.SceneLoader.ImportMesh("", "assets/", "tree.babylon", scene, function (models) { 
     //    models[0].scaling = new BABYLON.Vector3(10.0, 10.0, 10.0); 
     //    models[0].position.y = 0;

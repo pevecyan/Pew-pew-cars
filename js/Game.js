@@ -8,6 +8,9 @@ var checkpoints = [];
 
 var Game = {
     createWorld:function(scene){
+
+        Game.Car.gunshoot = new BABYLON.Sound("gunshot", "assets/pew.wav", scene);
+
         ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "assets/racetrack.png", 1000, 1000, 250, 0, 20, scene, false, function() {
         ground.position = new BABYLON.Vector3(100,0,0);
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsEngine.HeightmapImpostor, {
@@ -321,6 +324,7 @@ var Game = {
         wheels:null,
         bullets: [],
         shoot:function(){
+            Game.Car.gunshoot.play();
             var bullet = BABYLON.MeshBuilder.CreateSphere("bullet", {
                 width: 1,
                 height: 1,
@@ -447,7 +451,8 @@ var Game = {
                 direction.z *= 10;
                 bullet.position = bullet.position.add(direction);
             }
-        }
+        },
+        gunshoot:null
     },
     Keyboard:{
         up:false,
